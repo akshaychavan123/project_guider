@@ -1,0 +1,44 @@
+ 
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title> Sample_project</title>
+     <style>
+         * {
+             color: solid black;
+             background-color: aqua;
+         }
+     </style>
+ </head>
+ 
+ <body>
+ <h2> <%= User.shown %> </h2>
+ <h1> Listing All Users </h1>
+ <%= link_to "New User", new_user_path %>
+
+ <table>
+ <tr> <th>name </th>
+ <th>email </th>
+ <th>password </th> 
+ <th >action </th>
+ <th>action </th>
+ <th>action </th>
+ <th>action</th></tr>
+ <% @users.each do |user| %>
+    <tr> 
+    <td><%= user.name %> </td>
+    <td><%= user.email %> </td>
+    <td><%= user.password %> </td> 
+    
+    <td><%= link_to "show" , user %> </td> 
+    <td><%=  link_to "edit", edit_user_path(user)  %> </td> 
+    <td><%= button_to "Delete", user , method: :delete  %> </td> </tr>
+    <% end %> 
+ </body>
+ </html>
+
+
+    
