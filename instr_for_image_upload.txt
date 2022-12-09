@@ -1,4 +1,4 @@
-in this we are going to upoad to our model 
+in this we are going to upoad images to our model . implemented in sample crud repo
 
 1> rails active_storage
 2> rails db:migrate
