@@ -21,6 +21,7 @@
 <p> <strong> name : </strong> <%= @user.name %> </p>
 <p> <strong> email : </strong> <%= @user.email %> </p>
 <p> <strong> password : </strong> <%= @user.password %> </p>
+<%= image_tag @user.image , style: "width: 200px" %> 
 
 <p> <%= link_to "Back To User", users_path %>
 </body>

@@ -1,0 +1,17 @@
+in this we are going to upoad to our model 
+
+1> rails active_storage
+2> rails db:migrate
+3> in model.rb ie in 
+has_one_attached :image
+
+4> in user controller add image in user_params method
+params.require(:user).permit(:name , :age , :image)
+
+in views new.html.erb
+ <div><%= form.label :image %> <br>
+    <%= form.file_field :image %></div><br>
+
+6>
+in show.html.erb
+<%= image_tag @user.image , style: "width: 200px" %> 

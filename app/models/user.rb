@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+    has_one_attached :image
     # validates :name, :email , presence: true 
     # validates :password , uniqueness: true 
     has_many :smaccounts  
