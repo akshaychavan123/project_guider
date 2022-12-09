@@ -1,0 +1,40 @@
+this is fie used for attaching any kind of docs to model and later on download
+
+gem install carrierwave
+
+
+gem install bootstrap-sass
+
+add bot gem in gemfile
+
+bundle install
+
+ rails g model student name roll:integer email:text docs:string
+
+  rails g model student name roll:integer email:text docs:string
+
+  rails db:migrate
+
+  rails g uploader docs # all kind of files are handled bythis uploader came through carrierwave
+
+#now in model.rb => ie in student model
+  mount_uploader :docs, AttachmentUploader
+
+  # in config.rb
+   resources :students
+   root "students#index"
+
+   # generate logic on controller as usual like norma controller 
+
+   # add bootstrap in app/assets / stylesheet / student.css.scss
+   @import "bootstrap";
+
+
+
+   # create views for studens model
+index.html.erb
+<td><%= link_to "Download Student", student.docs_url %></td>   # for download link
+
+new.html.erb
+select file field for attaching files
+ <p> <strong> docs : </strong> <%= form.file_field :docs %> </p>
