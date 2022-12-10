@@ -1,0 +1,44 @@
+gem " kaminari" 
+
+ in student model.rb 
+ paginates_per 10
+ 
+ in student controller 
+ def index
+ @students = Student.all.page(params[:page])
+ end
+ 
+ in index.html.erb
+ at end 
+ <%= paginate @students %>
+ 
+ Another Task "Implementing search pattern in our model "
+ 
+ gem ' ransack'
+ bundle install
+ 
+ in student controller 
+ @q = Student.ransack(params[:q])
+ @students = @q.result.distinct: true).page(params[:page])
+ 
+ now create a search form in index.html.erb
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
