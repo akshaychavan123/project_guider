@@ -1,0 +1,38 @@
+Devise Gem Authentication
+
+condition : there are several model like restaurant , dish and reviews and having a polymorphic association 
+in between them so we are implementing devis gem 
+and allow only to authenticate user to create new records
+
+1> in your gemfile add 
+gem "devise"
+bundle install
+
+2>rails g devise:install
+this command will give u certain additinal lines of code to add in our application 
+
+like add 
+    <p class="notice"><%= notice %></p>
+       <p class="alert"><%= alert %></p>
+       in layout /application,html.erb above <% yield %> 
+
+       and in config/environments/development.rb:  at the end 
+
+       config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
+3> rails g devise user
+
+4>rails db:migrate
+
+5> check rails routes and add sign in , sign out on the root page or render navbar in layout
+
+6> if sign - ot is not working
+go to config/devise.rb
+ change    config.sign_out.via :delete
+ to       config.sign_out.via :get
+
+
+ 7> allow to only authenticate user 
+ in controlller of specific controller.rb
+ before_action :authenticate_user! , Except: [:create , :edit]
+
