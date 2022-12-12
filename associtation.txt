@@ -1,0 +1,78 @@
+#has many associaton in which school has many students and students belongs to school
+
+rails g model school name
+
+rails g model student roll:integer school:references
+or do like
+rails g model student roll:integer school:references
+
+#check into migration you will get
+t.references :school, null: false, foreign_key: true
+#and in student model 
+belongs_to :school
+
+# do following in school model
+has_many :students
+
+go to rails console
+create school
+var = School.first
+#now attch multiple students to variable no need to specify student id 
+var.students.create(........)
+var.students.create(........)
+var.students.create(........)
+
+# check all students of var ie School id 1
+var.students 
+
+
+#POLYMORPHIC ASSOCIATION
+
+CONDITION  : three model post , picture and blog has many comments 
+            but comment only belongs to either one of the above 
+
+            rails g model post name 
+            rails g model picture name
+            rails g model blog name
+
+             rails g model comment name 
+add following in migration
+t.integer :commentable_id , foreign_key: true , polymorphic: true
+t.string :commentable_type
+
+in models
+comments=> belongs_to :commentable , polymorphic: true  
+post,picture,blog => has_many :comments , as: :commentable
+
+rails db:migrate
+rails c
+
+HAS MANY THROUGH ASSOCIATION
+
+class Physician < ApplicationRecord
+  has_many :appointments
+  has_many :patients, through: :appointments
+end
+
+class Appointment < ApplicationRecord
+  belongs_to :physician
+  belongs_to :patient
+end
+
+class Patient < ApplicationRecord
+  has_many :appointments
+  has_many :physicians, through: :appointments
+end
+
+RAILS G MODEL PHYSICIAN NAME
+RAILS G MODEL PATIENT NAME
+RAILS G MODEL APPOINTSMENT  PHYSICIAN:REFERENCES PATIENT:REFERENCES
+
+
+
+
+
+
+
+
+
