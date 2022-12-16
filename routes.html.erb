@@ -1,0 +1,40 @@
+    review_restaurant POST   /restaurants/:id/review(.:format)                                                                 restaurants#review
+                         dish_restaurant POST   /restaurants/:id/dish(.:format)                                                                   restaurants#dish
+                             restaurants GET    /restaurants(.:format)                                                                            restaurants#index
+                                         POST   /restaurants(.:format)                                                                            restaurants#create
+                          new_restaurant GET    /restaurants/new(.:format)                                                                        restaurants#new
+                         edit_restaurant GET    /restaurants/:id/edit(.:format)                                                                   restaurants#edit
+                              restaurant GET    /restaurants/:id(.:format)                                                                        restaurants#show
+                                         PATCH  /restaurants/:id(.:format)                                                                        restaurants#update
+                                         PUT    /restaurants/:id(.:format)                                                                        restaurants#update
+                                         DELETE /restaurants/:id(.:format)                                                                        restaurants#destroy
+
+                                         on The Controller 
+                                         redirect_to restaurant_url(@restaurant)
+                                         render :new
+                                         redirect_to restaurants_path(@restaurant)
+                                           redirect_to restaurants_path
+
+                                           on the views 
+                                           link_to "create" ,  new_restaurant_path
+                                           <td><%= link_to "show" , restaurant  ,class:"btn btn-primary" %> </td>
+        <td><%= link_to "edit" , edit_restaurant_path(restaurant) ,class:"btn btn-warning" %></td>
+        <td><%= button_to 'delete' , restaurant ,method: :delete ,class:"btn btn-danger" %></td>
+
+        to the form
+        <%= form_with model: @review  ,  url: review_restaurant_path do |form| %>
+        to back
+        <%= link_to "Back" , restaurants_path , class:"btn btn-secondary btn-sm" %>
+on  the page to show 
+        <%= link_to "show" , @restaurant %>
+
+
+        on the routes 
+          resources :dishes
+  resources :reviews
+  resources :restaurants do
+    member do
+      post 'review'
+      post "dish"
+    end
+  end
