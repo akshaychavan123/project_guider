@@ -1,0 +1,33 @@
+def import
+    return redirect_to restaurants_path , notice: "only csv" unless params[:file].content_type=="text/csv"
+    file = params[:file] 
+    file = File.open(file)
+    restaurant_hash = {}
+    csv = CSV.parse(file , headers: true )
+    csv.each do |row|
+      restaurant_hash[:name]=row["name"]
+      restaurant_hash[:place]=row["place"]
+      Restaurant.create(restaurant_hash)
+    end
+    redirect_to restaurants_path , notice: "file imported successfully"
+  end
+
+
+On The  Index page
+ <%= form_with url: import_restaurants_path  , method: :post do |form| %>
+    <%= form.file_field :file , accept: ".csv" %>
+    <%= form.button "import" %>
+    <% end %>
+
+
+    routes.reviewable
+    resources :restaurants do
+    member do
+      post 'review'
+      post "dish"
+    end
+    collection do
+      post "import"
+    end
+   
+  end
