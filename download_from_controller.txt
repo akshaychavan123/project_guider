@@ -1,0 +1,50 @@
+  def download_csv_streaming
+    payload = {}
+    temp_file = "#{Time.now}"
+    respond_to do |format|
+      format.csv do
+        render_csv({file_name: temp_file , payload: payload})
+      end
+    end
+  end
+  def render_csv(input)
+    self.response_body= csv_lines(input[:payload] )
+  end
+  def csv_lines(payload)
+    @restaurants = Restaurant.all
+      CSV.generate do |csv|
+        
+      csv << ["id" , "name",  "place"  , 'menu' , 'price']
+      @restaurants.each do |restaurant|
+        
+      
+        if restaurant.dishes.any?
+          
+           other= restaurant.dishes.collect {|o| o.menu  }.join(", ")
+           another= restaurant.dishes.collect {|o|  o.price }.join(", ")
+   
+        else
+          nil
+        end
+        if restaurant.reviews.any?
+          comment= restaurant.reviews.collect {|o| o.comment  }.join(", ")
+          rating= restaurant.reviews.collect {|o|  o.rating }.join(", ")
+          csv << [restaurant.id , restaurant.name, restaurant.place , other, another , comment , rating]
+       else
+         nil
+       end
+
+      end
+    end
+  end
+
+
+  routes
+   collection do
+      post "import"
+      get "download_csv_streaming"
+    end
+
+  Download Button
+<%= link_to '', url_for( request.query_parameters.merge({action: "download_csv_streaming", format: "csv",report: params[:action]})) ,class: 'btn btn-primary fa fa-download download pull-right m-b-1' %>
+
