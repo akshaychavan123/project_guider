@@ -1,0 +1,89 @@
+
+this is in helper 
+text_message_campaign: has_many: text_messages
+text_messages belongs_to > text_message_campaign
+  class Reports::Reports
+  def self.text_messages(params, current_user)
+    start_date        = params['_start'].try(:to_time) || Time.new(2019,06,23)
+    end_date          = params['_end'].try(:to_time)   || Time.now.end_of_day
+    text_messages_sql = <<-SQL
+    SELECT tm.msisdn as msisdn,
+    tm.message as tm_message,
+    tm.status as tm_status,
+    tm.vendor_last_message as vendor_last_message,
+    tm.customer_id as customer_id,
+    tm.dispatched_at as sent_date,
+    tm.updated_at as updated_at,
+    tm.text_message_campaign_id as campaign_id,
+    text_message_campaign.title as campaign_title,
+  
+    
+    ifnull((tm.vendor_last_updated_at),(tm.dispatched_at)) as last_feedback
+    FROM text_messages tm
+    left join text_message_campaigns  on tm.text_message_campaign_id = text_message_campaigns.id
+    SQL
+    text_messages = []
+    text_messages = ReplicaDbBase.connection.exec_query(text_messages_sql).to_hash
+    # text_messages = ActiveRecord::Base.connection.exec_query(text_messages_sql).to_hash
+    text_messages
+  end
+
+
+
+  on the controller
+    def download_csv_streaming
+    payload = {}
+    payload['_start'] = params['_start'].to_s if params['_start']
+    payload['_end']   = params['_end'].to_s if params['_end']
+    report_type = "text_messages"
+    if params['_start'] && params['_end']
+      start_date = params['_start'].to_date.strftime('%d-%m-%y')
+      end_date = params['_end'].to_date.strftime('%d-%m-%y')
+      period = "period(#{start_date}|#{end_date})"
+    else
+      period = "All"
+    end
+    temp_filename = "#{report_type}_#{Time.now.strftime("%Y%m%d%H%M%S")}#{rand.to_s[2..5]}_#{period}"
+    #downloadable_report = DownloadableReport.create(user_id: current_user.id, report_name: temp_filename, expiry_date: 1.week.from_now)
+    respond_to do |format|
+      format.csv do 
+        render_csv({file_name: temp_filename,payload: payload, current_user: current_user})
+      end
+    end
+  end
+  
+ 
+  private
+    def render_csv(input)
+      set_file_headers(input[:file_name])
+      set_streaming_headers
+      response.status = 200
+      #setting the body to an enumerator, rails will iterate this enumerator
+      self.response_body = csv_lines(input[:payload],input[:current_user])
+    end
+
+    def set_file_headers(file_name)
+      headers["Content-Type"] = "text/csv"
+      headers["Content-disposition"] = "attachment; filename=\"#{file_name}.csv\""
+    end
+
+    def set_streaming_headers
+      #nginx doc: Setting this to "no" will allow unbuffered responses suitable for Comet and HTTP streaming applications
+      headers['X-Accel-Buffering'] = 'no'
+      headers["Cache-Control"] ||= "no-cache"
+      headers.delete("Content-Length")
+    end
+
+    def csv_lines(payload,current_user)
+      texts = Reports::Reports.text_messages(params,current_user)
+      column_headers = ["Customer ID", "Campaign Id", "Campaign Name","Message", "Status", "loan ID", "Vendor Message" , "Last Feedback"]
+      Enumerator.new do |y|
+        y << CSV.generate_line(column_headers)
+        texts.each do |text|
+          temp = [text['customer_id'], text['campaign_id'], text['campaign_title'], text['tm_message'], text['tm_status'], text['loan_id'], text['vendor_last_message'], 
+                 (tanzania_time_month_name(text['updated_at']))]
+          y << CSV.generate_line(temp)
+        end
+      end
+    end
+end
