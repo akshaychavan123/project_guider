@@ -1,0 +1,258 @@
+on the controller
+
+def upload_customer_limit(file)
+    score_details = []
+    error = false
+    i = 1
+    country_code = get_country_code
+    sample_msisdn = current_user.partner.sample_msisdn
+    xlsx = Roo::Spreadsheet.open(file)
+    xlsx.each_row_streaming(pad_cells: true,offset: 1) do |row|
+      i +=1
+      row_cells = row.map { |cell| cell.try(:value) }
+      payload = {}
+      payload[:partner_identifier]    = row_cells[0]
+      payload[:credit_score]          = row_cells[1]
+      payload[:credit_limit]          = row_cells[2]
+      payload[:new_limit]          = row_cells[3]
+
+      if (payload[:partner_identifier].present? && payload[:credit_score].present?  && payload[:credit_limit].present?  && payload[:new_limit].present?) 
+        payload[:partner_identifier] = country_code + payload[:partner_identifier].to_s
+        unless sample_msisdn.length == payload[:partner_identifier].length
+          error = true
+          break
+        end
+        score_details << payload
+      end
+    end
+    unless error
+      AirtelTzUploadCustomersLimit.perform_later(score_details, current_user.email) if score_details.present?
+      flash[:notice] = "Customer scores will be updated shortly"
+    else
+      flash[:notice] = "Please verify the sheet before upload, Error occured in Row number #{i} and MSISDN, Credit Score and credit limit are mandatory fields"
+    end
+  end
+
+
+  on the job
+
+  class AirtelTzUploadCustomersLimit < ApplicationJob
+
+  queue_as :slow
+
+  def perform(score_details, uploaded_by)
+    @partner = Partner.get('airtel_tz')
+    score_details.each do |score|
+      import(score, uploaded_by)
+    rescue => e
+      puts "[ERROR:JOB][AirtelTzUploadCustomersLimit] : For Score : #{score.inspect}"
+      puts "[ERROR:JOB][AirtelTzUploadCustomersLimit] : Message : #{e.message}"
+    end
+  end
+
+  def import(record, uploaded_by)
+    score = CustomerScore.find_by(partner_code: @partner.code, partner_identifier: record[:partner_identifier])
+    record[:actual_credit_limit] = record[:credit_limit] if record[:credit_limit].present?
+    record[:new_limit] = record[:new_limit] if record[:new_limit].present?
+    if score.present?
+      CustomerScore.update_scores(score, record, 'BulkUpload', @job.try(:class).try(:name), @job.try(:id), uploaded_by)
+    else
+      score = CustomerScore.find_or_initialize_by(partner_code: @partner.code, partner_identifier: record[:partner_identifier])
+      score.save
+      CustomerScore.update_scores(score, record, 'BulkUpload', @job.try(:class).try(:name), @job.try(:id), uploaded_by)
+    end
+    score.reload if score.present?
+    customer = Customer.find_by(msisdn: record[:partner_identifier])
+    if customer.present?
+      if record[:credit_score].present? && record[:credit_score] >= 1000
+        customer.data.except!(:non_eligible_reason)
+        customer.save
+      end
+      segment = customer.segment
+      if segment.present? && AutoDebit::SEGMENT_BASED_WALLET_DEBIT_PERCENTAGE[segment.downcase].present?
+        customer.data.merge!(customer_provided_wallet_ad_percent: AutoDebit::SEGMENT_BASED_WALLET_DEBIT_PERCENTAGE[segment.downcase].to_i)
+      else
+        customer.data.except!(:customer_provided_wallet_ad_percent)
+        customer.data.except!(:segment)
+        customer.save
+      end
+      customer.save
+    end
+  end
+
+end
+
+
+on the customer_score.rb model
+
+class CustomerScore < ScoreDbBase
+  self.table_name = 'scores'
+
+  has_paper_trail only: [:credit_limit]
+
+  belongs_to   :customer, foreign_key: 'partner_identifier', primary_key: 'partner_identifier', required: false
+  belongs_to   :partner, foreign_key: 'partner_code', primary_key: 'code', required: false
+  has_one   :customer_dnd, foreign_key: 'partner_identifier', primary_key: 'partner_identifier'
+  has_one   :customer_campaign, foreign_key: 'partner_identifier', primary_key: 'partner_identifier'
+
+  STANDARD_LIMIT = (ENV['STANDARD_LIMIT'].present? ? ENV['STANDARD_LIMIT'].to_i : 5000)
+  NEGATIVE_DEFAULT_LIMIT = (ENV['NEGATIVE_DEFAULT_LIMIT'].present? ? ENV['NEGATIVE_DEFAULT_LIMIT'].to_i : 2500)
+
+
+  # def customer
+  #   Customer.joins(:partner).where(partner_identifier: self.partner_identifier).where(partners: {code: self.partner_code}).last
+  # end
+
+  def standard_limit
+    STANDARD_LIMIT
+  end
+
+  def negative_default_limit
+    NEGATIVE_DEFAULT_LIMIT
+  end
+
+  def self.update_scores(score, record, trigger_process=nil, source_type=nil, source_id=nil, uploaded_by=nil)
+    # score.partner_identifier   = record[:partner_identifier] if record[:partner_identifier].present?
+    # score.credit_score         = record[:credit_score] if record[:credit_score].present?
+    # score.partner_customer_id  = record[:partner_customer_id] if record[:partner_customer_id].present?
+    # score.first_name           = record[:first_name] if record[:first_name].present?
+    # score.middle_name          = record[:middle_name] if record[:middle_name].present?
+    # score.last_name            = record[:last_name] if record[:last_name].present?
+    # score.segment              = record[:segment] if record[:segment].present?
+    # score.test_cell1           = record[:test_cell1] if record[:test_cell1].present?
+    # score.test_cell2           = record[:test_cell2] if record[:test_cell2].present?
+    # score.id_number            = record[:id_number] if record[:id_number].present?
+    # score.id_type              = record[:id_type] if record[:id_type].present?
+    # score.date_of_birth        = record[:date_of_birth] if record[:date_of_birth].present?
+    # # score.consent              = record[:consent] if record[:consent].present?
+    # score.aon                  = record[:aon] if record[:aon].present?
+    # score.am_spend             = record[:am_spend] if record[:am_spend].present?
+    # score.am_eligible_spends   = record[:am_eligible_spends] if record[:am_eligible_spends].present?
+    # score.airtel_active        = record[:airtel_active] if record[:airtel_active].present?
+    # score.current_loans        = record[:current_loans] if record[:current_loans].present?
+    # score.save
+
+    profile_data = {
+      credit_score: record[:credit_score],
+      new_limit: record[:new_limit],
+      partner_customer_id: record[:partner_customer_id],
+      first_name: record[:first_name],
+      middle_name: record[:middle_name],
+      last_name: record[:last_name],
+      segment: record[:segment],
+      test_cell1: record[:test_cell1],
+      test_cell2: record[:test_cell2],
+      id_number: record[:id_number],
+      id_type: record[:id_type],
+      date_of_birth: record[:date_of_birth],
+      aon: record[:aon],
+      am_spend: record[:am_spend],
+      am_eligible_spends: record[:am_eligible_spends],
+      airtel_active: record[:airtel_active],
+      current_loans: record[:current_loans]
+    }
+    result = score.bulk_update_score_data(profile_data, trigger_process, source_type, source_id, uploaded_by)
+    if record[:actual_credit_limit].present?
+      credit_limit = get_current_limit(score.credit_limit, score.actual_credit_limit ,record[:actual_credit_limit])
+      if score.customer.present? && score.customer.checkout_opt_in?
+        unless (credit_limit < 0) && (score.actual_credit_limit != record[:actual_credit_limit])
+          score.update_score_data('credit_limit', credit_limit, trigger_process, source_type, source_id, uploaded_by)
+          score.update_score_data('actual_credit_limit', record[:actual_credit_limit], trigger_process, source_type, source_id, uploaded_by)
+          score.update_score_data('default_credit_limit', record[:actual_credit_limit], trigger_process, source_type, source_id, uploaded_by)
+          score.save
+          true
+        else
+          false
+        end
+      else
+        score.apply_standard_limit(trigger_process, source_type, source_id, uploaded_by)
+        # score.update_score_data('default_credit_limit', record[:actual_credit_limit], trigger_process, source_type, source_id, uploaded_by)
+        score.save
+        true
+      end
+    end
+  end
+
+  def self.get_current_limit(limit,actual_limit,updated_limit)
+    if actual_limit.to_f < updated_limit.to_f
+      score = (updated_limit.to_f - actual_limit.to_f) + limit.to_f
+    elsif actual_limit.to_f > updated_limit.to_f
+      score = limit.to_f - (actual_limit.to_f - updated_limit.to_f)
+    else
+      score = limit
+    end
+    score
+  end
+
+  def apply_standard_limit(trigger_process, source_type=nil, source_id=nil, updated_by='system')
+    self.update_score_data('credit_limit', self.standard_limit, trigger_process, source_type, source_id, updated_by)
+    self.update_score_data('actual_credit_limit', self.standard_limit, trigger_process, source_type, source_id, updated_by)
+    self.update_score_data('default_credit_limit', self.standard_limit, trigger_process, source_type, source_id, updated_by)
+
+  end
+
+  def apply_no_hit_limit(trigger_process, source_type=nil, source_id=nil, updated_by='system')
+    credit_limit = CustomerScore.get_current_limit(self.credit_limit, self.actual_credit_limit ,self.default_credit_limit)
+    self.update_score_data('credit_limit', credit_limit,  trigger_process, source_type, source_id, updated_by)
+    self.update_score_data('actual_credit_limit', self.default_credit_limit, trigger_process, source_type, source_id, updated_by)
+  end
+
+  def apply_positive_limit(trigger_process, source_type=nil, source_id=nil, updated_by='system')
+    credit_limit = CustomerScore.get_current_limit(self.credit_limit, self.actual_credit_limit ,self.default_credit_limit)
+    self.update_score_data('credit_limit', credit_limit, trigger_process, source_type, source_id, updated_by)
+    self.update_score_data('actual_credit_limit', self.default_credit_limit, trigger_process, source_type, source_id, updated_by)
+  end
+
+  def apply_negative_limit(trigger_process, source_type=nil, source_id=nil, updated_by='system')
+    credit_limit = (self.actual_credit_limit - self.credit_limit)
+    if credit_limit < self.negative_default_limit
+      new_credit_limit         = (self.negative_default_limit - credit_limit) 
+      self.update_score_data('credit_limit', new_credit_limit, trigger_process, source_type, source_id, updated_by)
+      self.update_score_data('actual_credit_limit', self.negative_default_limit, trigger_process, source_type, source_id, updated_by)
+    else
+      self.update_score_data('credit_limit', 0, trigger_process, source_type, source_id, updated_by)
+      self.update_score_data('actual_credit_limit', credit_limit, trigger_process, source_type, source_id, updated_by)
+    end
+  end
+
+  def full_name
+    "#{self.first_name} #{self.middle_name} #{self.last_name}"
+  end
+
+  def opt_in_status(action, terms_and_conditions)
+    self.opt_in = action
+    self.terms_and_conditions_accepted_at = terms_and_conditions
+    self.save
+  end
+
+  def bulk_update_score_data(attribute_hash, process, source_type=nil, source_id=nil, updated_by='system')
+    status = false
+    return false if !(attribute_hash.is_a? Hash)
+    attributes = CustomerScore.column_names
+    attribute_hash.each do |key, value|
+      next if (!attributes.include?(key.to_s) || value.blank?)
+      update_score_data(key.to_s, value, process, source_type, source_id, updated_by)
+      status = true
+    end
+    status
+  end
+
+  def update_score_data(attribute, new_value, process, source_type=nil, source_id=nil, updated_by='system')
+    attributes = CustomerScore.column_names
+    return false if !attributes.include?(attribute)
+    track = {}
+    track[:previous_value] = self.send(attribute)
+    track[:target_attribute] = attribute
+    track[:new_value] = new_value
+    track[:customer_id] = self.customer.id
+    track[:source_type] = source_type
+    track[:source_id] = source_id
+    track[:updated_by] = updated_by || 'system'
+    track[:process] = process
+    
+    if self.save
+      CustomerScoreTracker.create(track)
+    end
+  end
+
+end
