@@ -1,0 +1,69 @@
+in reports helper =>
+
+ def self.merchants(params, partner)
+    merchants = Merchant.all
+    if params[:search_query].present?
+      merchants = merchants.where("lower(business_name) LIKE ? or lower(user_name) LIKE ? or lower(last_name) LIKE ?", "%#{params[:search_query]}%", "%#{params[:search_query]}%", "%#{params[:search_query]}%")
+    end
+    merchants
+  end  
+
+  another is there => elsif params['search_query'].present?
+      customer_scores_sql = <<-SQL
+        SELECT cs.partner_customer_id as partner_customer_id,
+        cs.partner_identifier as msisdn,
+        cs.first_name as first_name, 
+        =>   To Be Continue
+
+           In Index.Html.erb=>>>>
+
+
+
+             <div class='user_search mr-top-20'>
+    <%= form_tag(merchants_path, :method => "get", class: 'inline-block flt-right') do %>
+      <div class='user_search_form inline-block'>
+        <div class="search_field inline-block">
+          <%= search_field_tag :search_query, params[:search], placeholder: "Search Merchant by name", class: "form-control" %>
+        </div>
+        <div class="inline-block">
+          <%= button_tag "", :class => 'btn btn-info inline-block search_button fa fa-search',:name => nil%>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class='clr-both'></div>
+  <hr>
+  <div>
+    <% if @search_query.present? %>
+      <h5 class='text-success mr-btm-20'>'<%= @search_query %>'  - <%= @merchants.count %> results found </h5>
+    <% end %>
+  </div>
+
+
+
+
+on The Controlller =>>>>>>>> From Customers 
+ def index 
+    @customer_transaction_limits = CustomerTransactionLimit.all
+    if params[:search_query].present?
+      @search_query = params[:search_query]
+      @customer_transaction_limits = @customer_transaction_limits.where("partner_identifier LIKE ?", "%#{params[:search_query]}%")
+    end
+    @customer_transaction_limits.paginate(page: params[:page])
+  end   
+
+
+
+=>>>>>>>>> From Merchant controller 
+   def download_csv_streaming
+    payload = {}
+    payload['search_query'] = params[:search_query] if params[:search_query].present?
+    report_type = "merchants"
+    temp_filename = "#{report_type}_#{Time.now.strftime("%Y%m%d%H%M%S")}#{rand.to_s[2..5]}"
+    respond_to do |format|
+      format.csv do 
+        render_csv({file_name: temp_filename,payload: payload, current_user: current_user})
+      end
+    end
+  end
+
