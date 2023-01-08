@@ -1,0 +1,39 @@
+this is new way to downoad our mode data from using a DRY principe 
+
+in model >> in concern >> generate_csv.rb
+module GenerateCsv
+    extend ActiveSupport::Concern
+
+    class_methods do
+        require "csv"
+        def to_csv
+            CSV.generate(col_sep: true) do |csv|
+                csv << column_names
+                all.find_each do |record|
+                    csv << record.attributes.values
+                end
+            end
+        end
+    end
+end
+
+
+Second Step ==>>>>>>
+in any model that you want to  download data 
+class User < ApplicationRecord
+    include GenerateCsv 
+end
+   Third Step ==>>>>
+   on the controller 
+   @users = User.all
+   respond_to do |format|
+     format.html
+     format.csv do
+       send_data User.to_csv , filename: "#{Date.today.to_s}.csv" , content_type: "text/csv"
+     end
+   end
+
+
+   Fourth Step ==>>>>>
+   in views 
+   <%= link_to "Download as csv" , users_path(format: :csv) %>
