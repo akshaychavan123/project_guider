@@ -1,0 +1,135 @@
+rails new jwt_auth_api
+
+in gemfile add
+ gem 'jwt' 
+ gem 'bcrypt' 
+
+ bundle install
+
+ rails g model user name:string email:string password_digest:string username 
+
+ rails db:migrate 
+ rails g controller users 
+
+ in model user.rb
+ class User < ApplicationRecord
+    require "securerandom"
+
+    has_secure_password
+
+    validates :name , presence: true 
+    validates :email , presence: true , uniqueness: true , null: false
+    validates :password , uniqueness: true , null: false
+    validates :username , presence: true
+
+end
+
+in controller ie in users_controller.rb
+
+class UsersController < ApplicationController
+    before_action :set_user , except: %i[index new create]
+    skip_before_action :authenticate_request , only: [:create]
+    def index
+        @users = User.all
+    end
+    def new 
+        @user = User.new
+    end
+     def update_status
+        if @user.update(status: params[:status])
+            redirect_to @user , notice: "status changed successfully "
+        end
+     end
+    def create
+        @user = User.new(user_params)
+        if @user.save
+            redirect_to users_path(@user) , notice: "user created successfully"
+        else
+            render :new
+        end
+    end
+
+    def show
+    end
+
+    def edit
+    end
+
+    def update
+        if @user.update(user_params)
+            redirect_to users_path(@user) , notice: " user updated successfully"
+        else
+            render :edit
+        end
+    end
+
+    def destroy
+        @user.destroy
+        redirect_to users_path , notice: "#{@user} deleted successfully"
+    end
+    private
+    def user_params
+        params.require(:user).permit(:name , :task , :start_time , :end_time)
+    end
+
+    def set_user
+        @user = User.find(params[:id])
+    end
+end
+
+
+# Now create JWT Concerns 
+in app/controller/concern/json_web_token.rb
+require 'jwt'
+
+module JsonWebToken
+    extend ActiveSupport::Concern
+    SECRET_KEY = Rails.application.secret_key_base
+    def jwt_encode(payload , exp = 7.days.from_now)
+        payload[:exp] = exp.to_i
+        JWT.encode(payload , SECRET_KEY)
+    end
+
+    def jwt_decode(token)
+        decoded = JWT.decode(token , SECRET_KEY)[0]
+        HashWithIndifferentAccess.new decoded
+    end
+end
+
+now create authenticate request function
+in app/controller/applicatio_controller.rb
+class ApplicationController < ActionController::API
+    include JsonWebToken
+    before_action :authenticate_request
+    private
+    def authenticate_request
+        header = request.headers["Authorization"]
+        header = header.split(" ").last if header
+        decoded = jwt_decode(header)
+        @current_user = User.find(decoded[:user_id])
+    end
+end
+ Now create Authentication controller
+
+ rails g controller authentication
+
+ in authentication_controller.rb
+ class AuthenticationController < ApplicationController
+    skip_before_action :authenticate_request
+    def login
+        @user = User.find_by_email(params[:email])
+        if @user&.authenticate(params[:password])  #check for password or password_digest
+            token = jwt_encode(user_id: user.id)
+            render json: {token: token} , status: :ok
+        else
+            render json: {error: "unauthorised"}
+        end
+    end
+end
+
+# Now update routes 
+resources :users
+  post '/auth/login' , to: "authentication#login"
+
+
+
