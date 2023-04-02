@@ -141,5 +141,40 @@ Accesssssssssssingggggggggggg
 d1.subdemo
 s1.demo
 
+
+
+############ HAS ONE THROUGH association addedd $$$$$$$$$$$$$$$$$$$$$$$
+has one through association is also similar to has many through . 
+in the below example we have a department having one manager and a manager history through manager
+
+rails g model department name:string
+rails g model manage name email contact department:references
+rails g model manager_history joining_date experience manager:references
+
+class Department < ApplicationRecord
+    has_one :manage
+    has_one :manager_history , through: :manage
+end
+
+class Manage < ApplicationRecord
+    belongs_to :department
+    has_one :manager_history
+  end
+
+  class ManagerHistory < ApplicationRecord
+    belongs_to :manage
+  end
+
+in rails c 
+
+    Department.create(name: )
+    Manage.create(name: ... , department_id: 1 )
+    ManagerHistory.create(nadjajkjik , ........... , manager_id: 1)
+@@@@@@@@@#$%%%%%%%%^ Accesssingggggggggggggggggg$%^&*(*&^%$$$$$$$$$$$$$$$)
+
+
+m = Manager.first
+m.department
+m.manager_history
   
 
