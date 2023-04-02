@@ -69,9 +69,46 @@ RAILS G MODEL PATIENT NAME
 RAILS G MODEL APPOINTSMENT  PHYSICIAN:REFERENCES PATIENT:REFERENCES
 
 
+$$$$$$$HAS_AND_BELONGS_TO_MANY ASSOCIATION$$$$$$$%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$####
 
 
+has and has_and_belongs_to_many association forms the many to many relation
+between models . but for that we have to create a join table of the relevent model 
+with a proper lexical order i.e in a alphabeticle order . 
 
+suppose we have student an dcourse model so student can enroll for multiple
+course and a course can have multiple students.
+
+class Student < ApplicationRecord
+    has_and_belongs_to_many :courses
+end
+
+class Course < ApplicationRecord
+    has_and_belongs_to_many :students
+end
+
+
+following is the lexical order to create join table 
+rails g migration courses_students_join_table
+
+
+class CoursesStudentsJoinTable < ActiveRecord::Migration[7.0]
+    def change
+      create_join_table :courses , :students
+    end
+  end
+   rails db:migrate 
+  create dummy data for both the student and courses table 
+s1.courses << c1
+or s1.courses.create(course_name: "ruby" , fees: 2343 )
+
+similarly for the courses generation 
+
+and if you are not creating the join table in alphabeticla order then you have to mention the 
+join table in models such as 
+
+has_and_belongs_to_many :students , join_table: "students_courses" 
+has_and_belongs_to_many :courses , join_table: "students_courses" 
 
 
 
