@@ -112,4 +112,34 @@ has_and_belongs_to_many :courses , join_table: "students_courses"
 
 
 
+############3 HAS ONE ASSOCIATION $$$$$$$$$$$$$$$$$$$ **************
+
+has one association comes with the belongs_to association . supose every department has one manager
+and every manager belongs to one department . it is same as the has many association 
+except the tables/models names are in singular format .
+
+rails g model demo name status
+rails g model subdemo title demo:references
+
+rails db:migrate
+
+
+class Demo < ApplicationRecord
+    has_one :subdemo
+end
+
+class Subdemo < ApplicationRecord
+    belongs_to :demo
+  end
+
+in rails c
+d1=    Demo.create(name: "first" , status: "first")
+s1 = Subdemo.create(title: "first" , demo_id: 1)
+
+we can attach only one id 
+Accesssssssssssingggggggggggg
+d1.subdemo
+s1.demo
+
+  
 
