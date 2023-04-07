@@ -8,5 +8,58 @@ git status -s ==>> MU =>> first one is for staging area changes second for works
 git init ==>> Start the git repo
 
 git add ==>> adding files to staging area
-git restore ==>> removing back the files which are staged
+git restore   <file > or   ...s ==>> removing back the files which are staged or unstaging files 
+git checkout <file> ....s
+
+git commit -m "message " ==>  taking the snap of files 
+now if you modify the commiteed files then 
+1.. git add <file >  or 
+2.. git restore --staged <file> ... to unstage or  ...2
+2 ... git reset   ...2
+
+
+
+similar case like some file added , stagesd and commited and then after that push 
+and now if you messed in that files and if you want the last committed code back then do 
+
+1.. git checkout <file> ==>> will return last commited code of the file
+2.. git checkout -f ==>> all new changes that are not committed will deleted and 
+return files at the last  commits.
+
+git log -p -5 ==>> last 5 commits and the changes in the commits
+git log --oneline ==>> will show you the all logs in a singl eline
+git show <log name > ==>> will show you the commits changes of the file
+
+
+
+git diff <file > ==>> compare working file with staged file 
+git diff --staged  ==>>compare staging file with last commit files
+
+git rm --cached <file> ==> will remove files from staging but will present in workspace
+git rm <file> ==>> will delete file permenantly
+
+ 
+## rebase to a branch 
+from your branch do 
+git rebase <branch name > ==>> branch name of that branch to which rebase 
+git add commit then rebase and force push git push origin <rebase_branch_name>
+
+
+##UNdoing commits and Changes 
+git checkout /git clean /git revert/ git reset /git rm
+
+remove last commit with reset ==>>
+
+git log --oneline 
+git reset --hard <id of commit 4567wdh89 > 
+now git head is at that commit ==  git checkout branch_jknj
+
+bellow method to add new change in last commit
+git commit --ammend ==>> after adding the remaining files attaching to tyhem to last commits
+
+## Remove all untracked files or new generated file 
+
+git clean -f ==> remove all untracked files 
+git clean -f <path file name >  ==>> remove specified file 
+git clean -df ==>> untracked files and untracked directories is also removed permenantely
 
