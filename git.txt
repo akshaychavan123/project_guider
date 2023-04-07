@@ -1,0 +1,12 @@
+untracked==>> files to be added or before added
+modified ==>> after add to stage or commited files when edited
+staged ==>> added files but not committed
+commit ==>> taking snap
+git status -s ==>> MU =>> first one is for staging area changes second for workspace
+
+
+git init ==>> Start the git repo
+
+git add ==>> adding files to staging area
+git restore ==>> removing back the files which are staged
+
