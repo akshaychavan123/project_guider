@@ -49,3 +49,13 @@ apply validation for having roles while we are updating the user
 
 
 for more information checkout  rollify gem
+
+
+this gem can also be used for authorization purposes
+
+in controlle /index action
+    if current_user.has_role? :admin
+        @users = User.all
+    else
+        redirect_to root_path , alert: "unauthorised entry"
+    end
