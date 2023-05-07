@@ -47,3 +47,32 @@ developement:
         secret_access_key: 7888888
 
 now if you push all project to the github your credentials will not be sent 
+
+
+==============================================================================================================================
+
+Another way to add credentials
+
+create .env file into your application
+
+add  into gemfile
+gem 'dotenv-rails', groups: [:development, :test] 
+
+set credentials like
+
+into your .env file 
+github_id = 1234
+github_secret = 234567vhbjmn,km b5678u
+
+access in console like 
+ENV['github_id'] ====>>>> use in application also 
+ENV['github_secreat']
+
+add below line in application.rb
+above modile and below bundler 
+
+Dotenv::Railtie.load
+
+
+add .env file into .gitignore so that it will not moved to repository
+

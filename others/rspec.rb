@@ -35,10 +35,16 @@ for running specs run the command
   and create specs in models folder like
   require 'rails_helper'
 
-RSpec.describe User, type: :model do
+RSpec.describe User, type: :model do   ===>>> same for the controllers also create spec/controllers/file_name_spec.rb 
+                                                ==RSpec.describe User, type: :controller do
+                                      or use command rails g rspec:controller users
+
  
   context "creating an user " do 
-    let (:user) {create :user}
+    let (:user) {create :user} ==>>> you can also create user like 
+                                     user = FactoryBot.create(:user)
+                                     or user = FactoryBot.create(:user , name: "xyz" , age: 26, ...)
+                                     for creating user like let(:user) {:create :user} u have to create a spec/support/factory_bot.rb
     let (:user1) {create :user }
     it "shoulv be a valid user" do
       expect(user.id).to_not eq(nil)
