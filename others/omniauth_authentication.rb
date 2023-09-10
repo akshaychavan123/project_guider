@@ -1,5 +1,10 @@
 # in gemfile ===>>>>
 
+TWO IMPORTANT THINGS TO BE NOTE
+USER @USER.PRESENT? INSTED OF @USER.PERSISTED 
+AND USE IN APPLICTION CONTROLLER SHOULD BE INHERITED FROM BASE THAN API
+
+
 gem "devise"
 gem 'omniauth-github', github: 'omniauth/omniauth-github', branch: 'master'
 gem "omniauth-rails_csrf_protection"
@@ -20,7 +25,6 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           redirect_to new_user_registration_url 
       end
     end
-  
     # def google_oauth2
     #   @user = User.from_omniauth(request.env['omniauth.auth'])
     #   if @user.persisted?
