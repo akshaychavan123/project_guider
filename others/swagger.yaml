@@ -1,0 +1,1631 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/signup:
+    post:
+      summary: Creates a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+      responses: 
+        '201':
+          description: Created
+  /api/login:
+    post:
+      summary: login a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    password:
+                      type: string
+                    role:
+                      type: string
+      responses: 
+        '201':
+          description: Created
+  /api/logout:
+    delete:
+      summary: Logout from account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                
+      responses: 
+        '201':
+          description: Created
+  /api/forgot_password:
+    post:
+      summary: user forgets password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+      responses: 
+        '201':
+          description: Created
+  /api/reset_password:
+    post:
+      summary: user reset password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    reset_password_token:
+                      type: string
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+      responses: 
+        '201':
+          description: Created  
+  /leaves:
+    get:
+      summary: Retrieve a list of leaves
+      tags:
+        - Leaves API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create a new leave
+      description: Use this API to create a new leave.
+      tags:
+        - Leaves API
+      requestBody:
+              required: true
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      leave:
+                        type: object
+                        properties:
+                          from_time:
+                            type: string
+                          to_time:
+                            type: string
+                          leave_type:
+                            type: string
+                          from_date:
+                            type: string
+                          to_date:
+                            type: string
+                          leave_status:
+                            type: string
+                          reason:
+                            type: string
+                          consumed_leave:
+                            type: integer
+                          apply_to:
+                            type: string
+                          employee_name:
+                            type: string
+                          
+      responses:
+        '201':
+          description: Leave created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /leaves/{id}:
+    get:
+      summary: Show a leave
+      tags:
+        - Leaves API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the leave to show
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '404':
+          description: Leave not found
+        '500':
+          description: Internal server error
+    put:
+      summary: update leaves.
+      tags:
+        - Leaves API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the leave to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                leave:
+                        type: object
+                        properties:
+                          from_time:
+                            type: string
+                          to_time:
+                            type: string
+                          leave_type:
+                            type: string
+                          from_date:
+                            type: string
+                          to_date:
+                            type: string
+                          leave_status:
+                            type: string
+                          reason:
+                            type: string
+                          consumed_leave:
+                            type: string
+                          employee_name:
+                            type: string
+                          
+      responses: 
+        '201':
+          description: Created 
+    
+    delete:
+      summary: delete leaves.
+      tags:
+        - Leaves API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the leave to Delete
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: Created 
+  /displayleaves:
+    get:
+      summary: Retrieve a list of leaves for dashboard
+      tags:
+        - Leaves API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+
+
+  /statuses:
+    get:
+      summary: Retrieve a list of statuses
+      tags:
+        - Status API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+
+    post:
+      summary: add a new status
+      description: Use this API to create a new status.
+      tags:
+        - Status API
+      requestBody:
+              required: true
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      status:
+                        type: object
+                        properties:
+                          to:
+                            type: string
+                          cc:
+                            type: string
+                          status_date:
+                            type: string
+                            format: date-time
+                          tasks_attributes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                working_hours:
+                                  type: number
+                                  format: double
+                                task_status:
+                                  type: string
+                                task_description:
+                                  type: string
+                                billing_hours:
+                                  type: number
+                                  format: double
+                                project_id:
+                                  type: integer
+                                  format: int64
+      responses:
+        '201':
+          description: status created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /statuses/{id}:
+    get:
+      summary: Show a status.
+      tags:
+        - Status API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the status to update
+          required: true
+          schema:
+            type: integer                
+      responses: 
+        '201':
+          description: Created
+    put:
+      summary: update Status.
+      tags:
+        - Status API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the status to update
+          required: true
+          schema:
+            type: integer  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: object
+                  properties:
+                    to:
+                      type: string
+                    cc:
+                      type: string
+                    status_date:
+                      type: string
+                      format: date-time
+                    tasks_attributes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          working_hours:
+                            type: number
+                            format: double
+                          task_status:
+                            type: string
+                          task_description:
+                            type: string
+                          billing_hours:
+                            type: number
+                            format: double
+                          project_id:
+                            type: integer
+                            format: int64
+      responses: 
+        '201':
+          description: Created 
+    
+    delete:
+      summary: delete Status.
+      tags:
+        - Status API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the status to update
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: Created 
+
+  /users/{id}/assign_managers:
+    post:
+      summary: Assign managers.
+      tags:
+        - Managers API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user to assign managers
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                manager_ids:
+                  type: array
+                  items:
+                    type: integer
+              example:
+                manager_ids: [3, 6]
+      responses:
+        '201':
+          description: Managers assigned successfully
+
+  /managers:
+    get:
+      summary: Show the managers of a user.
+      tags:
+        - Managers API
+      parameters:
+        - name: id
+          in: query
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    manager_ids:
+                      type: array
+                      items:
+                      type: integer
+                    full_name:
+                      type: string
+                    personal_email:
+                      type: string
+
+
+
+
+  /users:
+    get:
+      summary: Show all users information.
+      tags:
+        - Users API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+
+  /users/{id}:
+    get:
+      summary: Show a user.
+      tags:
+        - Users API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '200':
+          description: OK
+
+    put:
+      summary: Add profile picture.
+      tags:
+        - Users API
+      parameters:
+        - name: id
+          in: path
+          description: ID to Add profile picture.
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profile_picture:
+                  type: string
+                  format: binary
+      responses: 
+        '201':
+          description: Created 
+    
+    
+    delete:
+      summary: Delete a user.
+      tags:
+        - Users API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user to delete
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: Created 
+
+
+  /users/show_profile_picture/{id}:
+    get:
+      summary: Show Profile Picture.
+      tags:
+        - Users API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '200':
+          description: OK
+          
+  /users/update_profile_picture/{id}:
+    put:
+      summary: Update profile picture.
+      tags:
+        - Users API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profile_picture:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+    
+  /users/new_user:
+    post:
+      summary: Creates a user.
+      tags:
+        - Users API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+                    full_name:
+                      type: string
+                    father_name:
+                      type: string
+                    mother_name:
+                      type: string
+                    linkedin_profile:
+                      type: string
+                    contact_no:
+                      type: string
+                    personal_email:
+                      type: string
+                    blood_group:
+                      type: string
+                    marital_status:
+                      type: string
+                    date_of_birth:
+                      type: string
+                      format: date
+                    uan_no:
+                      type: string
+                    esic_no:
+                      type: string
+                    employee_id:
+                      type: string
+                    employee_type:
+                      type: string
+                    job_type:
+                      type: string
+                    date_of_joining:
+                      type: string
+                      format: date
+                    relieving_date:
+                      type: string
+                      format: date
+                    resignation_date:
+                      type: string
+                      format: date
+                    resignation_status:
+                      type: string
+                    notice_period:
+                      type: string
+                    retention_bonus:
+                      type: boolean
+                    retention_time:
+                      type: string
+                    retention_bonus_no:
+                      type: string
+                    gender:
+                      type: string
+                    city:
+                      type: string
+                    state:
+                      type: string
+                    pincode:
+                      type: string
+                    address:
+                      type: string 
+                    designation:
+                      type: string
+                    emergency_contact_no:
+                      type: string
+                  example:
+                      email: "john.doe@example.com"
+                      password: "securepassword"
+                      password_confirmation: "securepassword"
+                      full_name: "John Doe"
+                      father_name: "John Doe Sr."
+                      mother_name: "Mary Doe"
+                      linkedin_profile: "https://www.linkedin.com/in/johndoe/"
+                      contact_no: "1234567890"
+                      personal_email: "john.doe.personal@example.com"
+                      blood_group: "A+"
+                      marital_status: "Single"
+                      date_of_birth: "1990-01-01"
+                      uan_no: "UAN1234567890"
+                      esic_no: "ESIC123456"
+                      employee_id: "EMP001"
+                      employee_type: "Full-Time"
+                      job_type: "Software Engineer"
+                      date_of_joining: "2022-01-01"
+                      relieving_date: null
+                      resignation_date: null
+                      resignation_status: null
+                      notice_period: "1 month"
+                      retention_bonus: true
+                      retention_time: "2 years"
+                      retention_bonus_no: "RB123"
+                      gender: "male"
+                      city: "jaipur"
+                      state: "rajsthan"
+                      pincode: "123321"
+                      address: "malviy nagar, jaipur"
+                      designation: "react-developer"
+                      emergency_contact_no: "1234567890"
+      responses:
+        '201':
+          description: User created successfully.
+        '422':
+          description: Unprocessable Entity - Request validation failed.
+
+  /users/update_user/{id}:
+    put:
+      summary: Update user data.
+      tags:
+        - Users API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the user to update
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+                    full_name:
+                      type: string
+                    father_name:
+                      type: string
+                    mother_name:
+                      type: string
+                    linkedin_profile:
+                      type: string
+                    contact_no:
+                      type: string
+                    personal_email:
+                      type: string
+                    blood_group:
+                      type: string
+                    marital_status:
+                      type: string
+                    date_of_birth:
+                      type: string
+                      format: date
+                    uan_no:
+                      type: string
+                    esic_no:
+                      type: string
+                    employee_id:
+                      type: string
+                    employee_type:
+                      type: string
+                    job_type:
+                      type: string
+                    date_of_joining:
+                      type: string
+                      format: date
+                    relieving_date:
+                      type: string
+                      format: date
+                    resignation_date:
+                      type: string
+                      format: date
+                    resignation_status:
+                      type: string
+                    notice_period:
+                      type: string
+                    retention_bonus:
+                      type: boolean
+                    retention_time:
+                      type: string
+                    retention_bonus_no:
+                      type: string
+                    gender:
+                      type: string
+                    city:
+                      type: string
+                    state:
+                      type: string
+                    pincode:
+                      type: string
+                    address:
+                      type: string 
+                    designation:
+                      type: string
+                    emergency_contact_no:
+                      type: string
+                    Empcode:
+                      type: string
+
+      responses:
+          '201':
+            description: Status created successfully
+          '400':
+            description: Invalid request
+          '500':
+            description: Internal server error 
+
+  /salary_infos:
+    get:
+      summary: Show all salary information .
+      tags:
+        - Salary API              
+      responses: 
+        '201':
+          description: Created
+
+  /salary_infos/{id}:
+    post:
+      summary: Create Salary data.
+      tags:
+        - Salary API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the User to Create Salary Info
+        required: true
+        schema:
+          type: integer 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                salary_info:
+                  type: object
+                  properties:
+                    basic_salary:
+                      type: number
+                      format: decimal  
+                    allowance_medical:
+                      type: number
+                      format: decimal  
+                    hra:
+                      type: number
+                      format: decimal  
+                    gratuity:
+                      type: number
+                      format: decimal  
+                    allowance_special:
+                      type: number
+                      format: decimal         
+                    income_tax:
+                      type: string
+                      default: New Regime                
+      responses: 
+        '201':
+          description: Created 
+
+
+  # /salary_infos/{id}:
+    get:
+      summary: Show salary information .
+      tags:
+        - Salary API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the salary to update
+          required: true
+          schema:
+            type: integer                
+      responses: 
+        '201':
+          description: Created
+    
+    put:
+      summary: update Salary data.
+      tags:
+       - Salary API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the salary info to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                salary_info:
+                    type: object
+                    properties:
+                      basic_salary:
+                        type: number
+                        format: decimal  
+                      allowance_medical:
+                        type: number  
+                        format: decimal  
+                      hra:
+                        type: number
+                        format: decimal  
+                      gratuity:
+                        type: number
+                        format: decimal  
+                      allowance_special:
+                        type: number
+                        format: decimal         
+                      income_tax: 
+                        type: string
+                        default: New Regime              
+      responses: 
+        '201':
+          description: Created 
+
+    delete:
+      summary: Delete Salary Information.
+      tags:
+        - Salary API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the Salary Info to delete
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: deleted 
+
+
+    paths:
+  /api/all_check_in_out:
+    get:
+      summary: Fetch ALL check-in/check-out Data.
+      description: Use this API to show check-in/check-out punch data.
+      tags:
+        - Machine API
+      parameters:
+        - name: start_date
+          in: query
+          description: From Date.
+          # required: true
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          description: To Date.
+          # required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+
+        '500':
+          description: Internal server error
+
+  /api/machine_check_in_out:
+    get:
+      summary: Fetch machine check-in/check-out Data.
+      description: Use this API to show check-in/check-out punch data.
+      tags:
+        - Machine API
+      parameters:
+        - name: Empcode
+          in: query
+          description: Employee code.
+          required: true
+          schema:
+            type: string
+        - name: FromDate
+          in: query
+          description: From Date.
+          required: true
+          schema:
+            type: string
+        - name: ToDate
+          in: query
+          description: To Date.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+
+        '500':
+          description: Internal server error
+
+  paths:
+  /api/fetch_data:
+    get:
+      summary: Fetch Punch Data.
+      description: Use this API to download the last punch data.
+      tags:
+        - Machine API
+      parameters:
+        - name: Empcode
+          in: query
+          description: Employee code.
+          required: true
+          schema:
+            type: string
+        - name: FromDate
+          in: query
+          description: From Date.
+          required: true
+          schema:
+            type: string
+        - name: ToDate
+          in: query
+          description: To Date.
+          required: true
+          schema:
+            type: string
+      responses: 
+        '201':
+          description: Created
+        '500':
+          description: Internal server error
+  paths:
+  /api/last_record_data:
+    get:
+      summary: Fetch Last Record.
+      description: Use this API to download the last punch data.
+      tags:
+        - Machine API
+      parameters:
+        - name: Empcode
+          in: query
+          description: Employee code.
+          required: true
+          schema:
+            type: string
+        - name: LastRecord
+          in: query
+          description: Employee Last record (mmyyyy$ID)
+          required: true
+          schema:
+            type: string
+
+      responses: 
+        '201':
+          description: Created
+        '500':
+          description: Internal server error
+  
+  paths:
+  /check_in_out/check_in:
+    post:
+      summary: Check In
+      description: Use this API to check in a user.
+      tags:
+        - Check-in/Check-out API
+      requestBody:
+        description: Empcode of the user to check in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Empcode:
+                  type: string
+      responses:
+        '200':
+          description: Check-in successful
+          content:
+            application/json:
+              example:
+                message: Checked in successfully
+                checkin_time: '2023-08-19T12:34:56Z'
+        '422':
+          description: Check-in failed
+          content:
+            application/json:
+              example:
+                error: Check-in failed
+
+  /check_in_out/check_out:
+    post:
+      summary: Check Out
+      description: Use this API to check out a user.
+      tags:
+        - Check-in/Check-out API
+      requestBody:
+        description: Empcode of the user to check out
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Empcode:
+                  type: string
+      responses:
+        '200':
+          description: Check-out successful
+          content:
+            application/json:
+              example:
+                message: Checked out successfully
+                checkout_time: '2023-08-19T17:45:21Z'
+        '422':
+          description: Check-out failed
+          content:
+            application/json:
+              example:
+                error: Check-out failed
+    
+  /documents:
+    get:
+      summary: Show all documents information.
+      tags:
+        - Document API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+
+  /documents/{id}:
+    post:
+      summary: Create Document data.
+      tags:
+        - Document API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the User to Create Document
+        required: true
+        schema:
+          type: integer 
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                # document:
+                #   type: object
+                #   properties:
+                    # user_id:
+                    #   type: integer
+                    #   format: int64
+                    resume:
+                      type: string
+                      format: binary
+                    aadhar:
+                      type: string
+                      format: binary
+                    pan:
+                      type: string
+                      format: binary
+                    passport:
+                      type: string
+                      format: binary
+                    relieving_letter:
+                      type: string
+                      format: binary
+                    experience_letter:
+                      type: string
+                      format: binary
+                    bank_statement_3_mon:
+                      type: string
+                      format: binary
+                    
+      responses:
+        '201':
+          description: Status created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+
+
+  # /documents/{id}:
+    get:
+      summary: Show a document
+      tags:
+        - Document API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the document to show
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '404':
+          description: Document not found
+        '500':
+          description: Internal server error
+
+
+    put:
+      summary: Update Document data.
+      tags:
+        - Document API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the document to update
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                document:
+                  type: object
+                  properties:
+                    user_id:
+                      type: integer
+                      format: int64
+                    resume:
+                      type: string
+                    aadhar:
+                      type: string
+                    pan:
+                      type: string
+                    passport:
+                      type: string
+                    relieving_letter:
+                      type: string
+                    experience_letter:
+                      type: string
+                    bank_statement_3_mon:
+                      type: string
+                    
+      responses:
+        '201':
+          description: Status created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+      
+    delete:
+      summary: Delete Document.
+      tags:
+        - Document API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the document to delete
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: Created
+
+
+  /bank_details/{id}:
+    post:
+      summary: Create Bank details.
+      tags:
+        - Bank details API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the user 
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bank_detail:
+                  type: object
+                  properties:
+                    account_name:
+                      type: string
+                    account_number:
+                      type: string
+                    ifsc:
+                      type: string
+                    cancelled_cheque:
+                      type: string
+      responses:
+        '201':
+          description: Created
+
+            
+  # /bank_details/{id}:
+    get:
+      summary: Show bank details.
+      tags:
+        - Bank details API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the Bank
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bank_details:
+                    type: object
+                    properties:
+                      account_name:
+                        type: string
+                      account_number:
+                        type: string
+                      ifsc:
+                        type: string
+                      cancelled_cheque:
+                        type: string
+      responses:
+        '201':
+          description: Created
+
+    put:
+      summary: Update Bank Details.
+      tags:
+        - Bank details API
+      parameters:
+        - name: id
+          in: path
+          description: ID to update bank details 
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bank_detail:
+                  type: object
+                  properties:
+                    account_name:
+                      type: string
+                    account_number:
+                      type: string
+                    ifsc:
+                      type: string
+                    cancelled_cheque:
+                      type: string
+      responses:
+        '201':
+          description: Created
+
+    delete:
+      summary: Delete Bank details .
+      tags:
+        - Bank details API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the bank details to delete
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: Created 
+
+  /job_openings:
+    get:
+      summary: Show all job openings information.
+      tags:
+        - JobOpening API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create Job Opening data.
+      tags:
+        - JobOpening API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_opening:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    requirements:
+                      type: string
+                    vacancy_count:
+                      type: string
+                    job_type:
+                      type: string
+                    status:
+                      type: string
+                    location:
+                      type: string
+                                       
+      responses:
+        '201':
+          description: Job Opening created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /job_openings/{id}:
+    get:
+      summary: Show a Job Opening
+      tags:
+        - JobOpening API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the Job Opening to show
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '404':
+          description: JOb Opening not found
+        '500':
+          description: Internal server error
+
+
+    put:
+      summary: Update Job Opening data.
+      tags:
+        - JobOpening API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the Job Opening to update
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_opening:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    requirements:
+                      type: string
+                    vacancy_count:
+                      type: string
+                    job_type:
+                      type: string
+                    status:
+                      type: string
+                    location:
+                      type: string
+                                          
+      responses:
+        '201':
+          description: Status created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    
+    delete:
+      summary: Delete Job Opening.
+      tags:
+        - JobOpening API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the Job to delete
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '201':
+          description: Created
+
+  /contact_us:
+    get:
+      summary: Show all contact us information.
+      tags:
+        - ContactUs API
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: Internal server error
+    post:
+      summary: Create Contact US data.
+      tags:
+        - ContactUs API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contact_us:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    email:
+                      type: string
+                    phone_number:
+                      type: string
+                    subject:
+                      type: string
+                    description:
+                      type: string
+      responses:
+        '201':
+          description: Contact US created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /contact_us/{id}:
+    get:
+      summary: Show a Contact US
+      tags:
+        - ContactUs API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the Contact US to show
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '404':
+          description: Contact US not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update Contact US data.
+      tags:
+        - ContactUs API
+      parameters:
+      - name: id
+        in: path
+        description: ID of the Contact US to update
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contact_us:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    email:
+                      type: string
+                    phone_number:
+                      type: string
+                    subject:
+                      type: string
+                    description:
+                      type: string
+      responses:
+        '201':
+          description: Status created successfully
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    delete:
+      summary: Delete Contact Us.
+      tags:
+        - ContactUs API
+      parameters:
+        - name: id
+          in: path
+          description: ID of the Contact Us to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Created
+servers:
+- url: http://{defaultHost}
+  variables:
+    defaultHost:
+      default: localhost:3000
+- url: https://{herokuHost}
+  variables:
+    herokuHost:
+      default: deeporionback-0cd6e44c3c14.herokuapp.com
+  
