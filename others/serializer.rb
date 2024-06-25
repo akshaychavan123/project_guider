@@ -62,4 +62,25 @@ for create==>>
         render json: CouponCodeSerializer.new(@coupon).serializable_hash , status: :ok
     else
         render json: ErrorSerializer.new(@coupon).serializable_hash , status: :unprocessable_entity
+
+#using association and except attributes
+
+class SalaryInfoSerializer < ActiveModel::Serializer
+    attributes :id, :user_id, :ctc
+    belongs_to :addition
+    belongs_to :deduction
+    belongs_to :other
+
+    def addition
+        object.addition.as_json(except: [:created_at, :updated_at])
+    end
+
+    def deduction
+        object.addition.as_json(except: [:created_at, :updated_at])
+    end
+
+    def other
+        object.addition.as_json(except: [:created_at, :updated_at])
+    end
+end
         
