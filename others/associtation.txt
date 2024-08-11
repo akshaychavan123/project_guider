@@ -177,4 +177,33 @@ m = Manager.first
 m.department
 m.manager_history
   
+suppose user and post model is there and doesnt matter if they have any association before or if associations 
+of has many na dbelongs_to 
+
+now requirement is that i have to add share_to to post table which has should be many users .
+
+will create new table 
+rails g migration create_table_posted_users ==>> u can have any table name migration might look like below 
+
+    create_table :posted_users do |t|
+      t.references :article, null: false, foreign_key: true
+      t.references :user, null: false, foreign_key: true
+      t.timestamps
+    end
+
+create a new model posted_user.rb
+class PostedUser < ApplicationRecord
+belongs_to :post
+belongs_to :user
+end
+
+now in post model 
+has_many :posted_users
+has_many :posted_to , throught: :posted_users, class_name: "User" ==>> has_many can be anything as per requirement
+
+now in console be like 
+p = Post.last
+p.posted_to << [u1, u2]
+or p.posted_to_ids = [1, 2]
+
 
