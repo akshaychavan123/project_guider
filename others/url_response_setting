@@ -1,0 +1,30 @@
+suppose in user model
+has_many_attached :images
+
+in controller
+
+url_response = get_image_url(@user.images)
+render json: { data: @user.attributes.merge(images: url_response) }, status: :created 
+
+in private
+private
+
+def get_image_url(attachements)
+  return nil if attachements.nil? 
+  files = []
+  attachements.each do |attachment|
+    files << {
+    url: attachment.url or attachment.service_url both are same    else if u use url_for(attachment) then it will give url of the localhost
+    name: url.filename,
+    type: url.content_type
+      }
+  end
+files
+end
+
+mostly this url: attachment.url is too long 
+if you wanted to make it shorter then
+test_url = attachement.url.split("?", 2)
+final_url = test_url.first
+  { url: final_url}
+
