@@ -40,6 +40,11 @@ add following in migration
 t.integer :commentable_id , foreign_key: true , polymorphic: true
 t.string :commentable_type
 
+i have tested on gpt showing above is incorrect way .. and the correct one is
+t.bigint :commentable_id, null: false
+t.string :commentable_type, null: false
+
+
 in models
 comments=> belongs_to :commentable , polymorphic: true  
 post,picture,blog => has_many :comments , as: :commentable
