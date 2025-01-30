@@ -115,6 +115,17 @@ join table in models such as
 has_and_belongs_to_many :students , join_table: "students_courses" 
 has_and_belongs_to_many :courses , join_table: "students_courses" 
 
+Or the simplest way to add the has_and_belongs_to_many association between 2 models is give their model name in command without any value adde like below
+rails g migration join_table_cources_students cource student
+this above command will directely add below kind of migration migrate it as it
+class JoinTableCourcesStudents < ActiveRecord::Migration[7.0]
+  def change
+    create_join_table :cources, :students do |t|
+      # t.index [:cource_id, :student_id]
+      # t.index [:student_id, :cource_id]
+    end
+  end
+end
 
 
 ############3 HAS ONE ASSOCIATION $$$$$$$$$$$$$$$$$$$ **************
