@@ -197,6 +197,7 @@ click on exchange authorization code for token
 it will give you response copy id_token from here
 
 
-
+**and for frontend team credentials suppose if frontwas working localhost:5173 on this port 
+then while generating creds add javascript origin as localhost:5173 and redirect_url as same localhost:5173
     
 
