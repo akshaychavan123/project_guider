@@ -196,3 +196,38 @@ ActiveAdmin.register AdminUser do
 
 
 end 
+
+
+==========================================================================================================================================================================================
+in my local when i installed active_admin and created active admin resource then for every resource am getting an error for 
+ransackable_auth_attributes to be add in model .
+to handle this i have added ransack gem and in ransack.rb initializer file add below code 
+
+Ransack.configure do |config|
+  config.ignore_unknown_conditions = true
+end
+
+Rails.application.config.to_prepare do
+  ApplicationRecord.class_eval do
+    def self.ransackable_attributes(auth_object = nil)
+      column_names
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      reflect_on_all_associations.map(&:name).map(&:to_s)
+    end
+  end
+
+  # 🔹 ActiveStorage Attachment & Blob के लिए allowlist सेट करो  
+  ActiveStorage::Attachment.class_eval do
+    def self.ransackable_attributes(auth_object = nil)
+      %w[id name record_type record_id blob_id created_at]
+    end
+  end
+
+  ActiveStorage::Blob.class_eval do
+    def self.ransackable_attributes(auth_object = nil)
+      %w[id key filename content_type metadata service_name byte_size checksum created_at]
+    end
+  end
+end
