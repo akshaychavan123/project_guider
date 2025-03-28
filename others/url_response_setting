@@ -28,3 +28,4 @@ test_url = attachement.url.split("?", 2)
 final_url = test_url.first
   { url: final_url}
 
+लेकिन Rails 7.1+ में इसे हटा दिया गया है, जिससे यह undefined method error देगा।... service_url method will not work.
