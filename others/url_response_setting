@@ -1,5 +1,28 @@
+for better performance in developement use storage as local and in production use it as amazon
+for local url_for(attachment)
+for prod attachment.url
 suppose in user model
 has_many_attached :images
+
+
+another way 
+  def medias
+    object.medias.map do |media|
+      if Rails.env.development? || Rails.env.test?
+        "#{base_url}#{Rails.application.routes.url_helpers.rails_blob_path(media, only_path: true)}"
+      else
+        media.service.send(:object_for, media.key).public_url
+      end
+    end
+  end
+
+  private
+
+  def base_url
+    ENV['BASE_URL'] || 'http://localhost:3000'
+  end
+
+====================================================================================================
 
 in controller
 
